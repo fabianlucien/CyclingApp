@@ -51,6 +51,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     /**
      * Handles incoming intents.
+     *
      * @param intent The Intent is provided (inside a PendingIntent) when requestActivityUpdates()
      *               is called.
      */
@@ -63,32 +64,37 @@ public class DetectedActivitiesIntentService extends IntentService {
         // device. Each activity is associated with a confidence level, which is an int between
         // 0 and 100.
         ArrayList<DetectedActivity> detectedActivities = (ArrayList) result.getProbableActivities();
+        ArrayList<RegisteredActivity> registeredActivitiesArr = new ArrayList<RegisteredActivity>();
 
         // Log each activity.
         Log.i(TAG, "activities detected");
 
-        for (DetectedActivity da: detectedActivities) {
+        for (DetectedActivity da : detectedActivities) {
 
-            String activityType = Constants.getActivityString(getApplicationContext(), da.getType());
-            int activityConfidence = da.getConfidence();
+            String activityType = Constants.getActivityString(getApplicationContext(), da.getType()); // get activity type
+            int activityConfidence = da.getConfidence();                                              // get confidence
 
-            Log.i("Testlog", activityType + " " +  Integer.toString(activityConfidence));
+            RegisteredActivity registeredActivity = new RegisteredActivity(); // create registeredActivity object
+            registeredActivity.setName(activityType);              // add name to object
+            registeredActivity.setPercentage(activityConfidence); // add confidence percentage to object
 
-            // collect all strings in a object and send to Parse
-
-
-//            Log.i("`Testlog", Constants.getActivityString(
-//                            getApplicationContext(),
-//                            da.getType()) + " " + da.getConfidence() + "% " + Integer.toString(i)
-//            );
-
-
+            registeredActivitiesArr.add(registeredActivity); // add the registered activity to an array
         }
 
-        test
+        // loop through all activities and reset the array for a new log
+
+        for (int i = 0; i < registeredActivitiesArr.size(); i++) {
+            Log.i("ArrLog", registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
+        }
+
+        registeredActivitiesArr.clear();
+
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+
     }
 }
+
+
