@@ -63,6 +63,7 @@ public class MainActivity extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status> {
 
     protected static final String TAG = "MainActivity";
+    public String testString = "test";
 
     /**
      * A receiver for DetectedActivity objects broadcast by the
@@ -358,5 +359,15 @@ public class MainActivity extends ActionBarActivity implements
                     intent.getParcelableArrayListExtra(Constants.ACTIVITY_EXTRA);
             updateDetectedActivitiesList(updatedActivities);
         }
+    }
+
+    // Method to start the service
+    public void startService() {
+        startService(new Intent(getBaseContext(), MyService.class));
+    }
+
+    // Method to stop the service
+    public void stopService() {
+        stopService(new Intent(getBaseContext(), MyService.class));
     }
 }

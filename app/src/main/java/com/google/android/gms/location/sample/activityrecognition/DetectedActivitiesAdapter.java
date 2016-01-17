@@ -17,7 +17,6 @@
 package com.google.android.gms.location.sample.activityrecognition;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,8 +61,6 @@ public class DetectedActivitiesAdapter extends ArrayAdapter<DetectedActivity> {
         int confidence = detectedActivity.getConfidence();
         String activity = Constants.getActivityString(getContext(),
                 detectedActivity.getType());
-
-        Log.i("Test", Integer.toString(confidence) + " " + activity + "Fabian test");
 
         activityConfidenceLevel.setText(detectedActivity.getConfidence() + "%");
         progressBar.setProgress(detectedActivity.getConfidence());

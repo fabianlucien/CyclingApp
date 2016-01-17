@@ -38,4 +38,15 @@
 
     <string name="not_connected">GoogleApiClient not yet connected. Try again.</string>
 
+    <!-- notification strings -->
+    <string name="collapsed_image">This is a collapsed notification.</string>
+    <string name="expanded"> You\'re cycling. Please stop!</string>
+    <string name="expanded_image">You\'re cycling. Please stop!</string>
+    <string name="cycling">You\'re cycling. Please stop!</string>
+
+    <!-- styling -->
+    <color name="white">#FFFFFF</color>
+
+
+
 </resources>

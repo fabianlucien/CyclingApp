@@ -24,3 +24,6 @@ public class RegisteredActivity {
         this.percentage = percentage;
     }
 }
+
+
+

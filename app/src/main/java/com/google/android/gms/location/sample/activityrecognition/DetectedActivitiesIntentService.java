@@ -17,28 +17,37 @@
 package com.google.android.gms.location.sample.activityrecognition;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  IntentService for handling incoming intents that are generated as a result of requesting
  *  activity updates using
  *  {@link com.google.android.gms.location.ActivityRecognitionApi#requestActivityUpdates}.
  */
-public class DetectedActivitiesIntentService extends IntentService {
+
+public class DetectedActivitiesIntentService extends IntentService  {
 
     protected static final String TAG = "DetectedActivitiesIS";
+
 
     /**
      * This constructor is required, and calls the super IntentService(String)
      * constructor with the name for a worker thread.
      */
+
     public DetectedActivitiesIntentService() {
         // Use the TAG to name the worker thread.
         super(TAG);
@@ -55,8 +64,12 @@ public class DetectedActivitiesIntentService extends IntentService {
      * @param intent The Intent is provided (inside a PendingIntent) when requestActivityUpdates()
      *               is called.
      */
+
     @Override
     protected void onHandleIntent(Intent intent) {
+
+
+
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION);
 
@@ -66,8 +79,9 @@ public class DetectedActivitiesIntentService extends IntentService {
         ArrayList<DetectedActivity> detectedActivities = (ArrayList) result.getProbableActivities();
         ArrayList<RegisteredActivity> registeredActivitiesArr = new ArrayList<RegisteredActivity>();
 
-        // Log each activity.
-        Log.i(TAG, "activities detected");
+        List<Integer> testList = LatestActivities.latestActivitiesList;
+
+        Log.i("List", String.valueOf(testList));
 
         for (DetectedActivity da : detectedActivities) {
 
@@ -81,19 +95,71 @@ public class DetectedActivitiesIntentService extends IntentService {
             registeredActivitiesArr.add(registeredActivity); // add the registered activity to an array
         }
 
-        // loop through all activities and reset the array for a new log
+        // Logging all activities in one entry
 
-        for (int i = 0; i < registeredActivitiesArr.size(); i++) {
-            Log.i("ArrLog", registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
+            for (int i = 0; i < registeredActivitiesArr.size(); i++) {
+                Log.i("ListLog", registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
+            }
+
+        // Old data entry is moved up one index. The oldest entry is removed by moving up the indexes.
+
+        testList.set(2, testList.get(1)); // move index 0 to index 1
+        testList.set(1, testList.get(0)); // move index 1 to index 2
+
+        Log.i("List", registeredActivitiesArr.get(0).getName().getClass().getName());
+        String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
+
+        if (activityWithHighestValue.equals("On a bicycle")){
+            Log.i("Listtest", "Cycling!");
+            testList.set(0, 1);  // if the newest activity is our target activity, set true
+        } else {
+            testList.set(0, 0); // if the newest activity is not our target activity, set false
+            Log.i("Listtest", "Not cycling!");
         }
 
-        registeredActivitiesArr.clear();
+        Log.i("Listafter", String.valueOf(testList));
 
+        // Now we have three indexes which contain either true or false for our target activity. If
+        // the threshold of 1 gets surpassed, and screen is on, we going to send a notification, as this means
+        // that the target activity is being performed by the user for the past few seconds
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
 
+    public void createNotification(){
+
+        Log.i("Noti", "Send");
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        Intent i = new Intent(this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);  //If set, the activity will not be launched if it is already running at the top of the history stack.
+        PendingIntent intent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(intent);
+
+
+        builder.setTicker("Please stop cycling"); // normally, a xml resource would be here
+        builder.setSmallIcon(R.drawable.ic_launcher);
+        builder.setAutoCancel(true); // remove all previous notifications
+        builder.setPriority(android.app.Notification.PRIORITY_MAX); // notification is hovering and on lock screen
+
+        android.app.Notification notification = builder.build();
+
+        RemoteViews contentview = new RemoteViews(getPackageName(), R.layout.notification);
+
+        final String text = "This is text"; // Nexus6, api23: this is the text that is set for the notification
+        contentview.setTextViewText(R.id.textView, text);
+
+        notification.contentView = contentview;
+
+        if (Build.VERSION.SDK_INT >=16){
+            RemoteViews expendedView =
+                    new RemoteViews(getPackageName(), R.layout.notification_expanded);
+            notification.bigContentView = expendedView;
+        }
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nm.notify(0, notification);
     }
 }
 
