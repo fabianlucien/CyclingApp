@@ -19,6 +19,7 @@ package com.google.android.gms.location.sample.activityrecognition;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
@@ -42,7 +43,6 @@ public class DetectedActivitiesIntentService extends IntentService  {
 
     protected static final String TAG = "DetectedActivitiesIS";
 
-
     /**
      * This constructor is required, and calls the super IntentService(String)
      * constructor with the name for a worker thread.
@@ -58,6 +58,7 @@ public class DetectedActivitiesIntentService extends IntentService  {
         super.onCreate();
     }
 
+
     /**
      * Handles incoming intents.
      *
@@ -67,8 +68,6 @@ public class DetectedActivitiesIntentService extends IntentService  {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
-
 
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION);
@@ -101,6 +100,8 @@ public class DetectedActivitiesIntentService extends IntentService  {
                 Log.i("ListLog", registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
             }
 
+        isScreenOn();
+
         // Old data entry is moved up one index. The oldest entry is removed by moving up the indexes.
 
         testList.set(2, testList.get(1)); // move index 0 to index 1
@@ -117,7 +118,7 @@ public class DetectedActivitiesIntentService extends IntentService  {
             Log.i("Listtest", "Not cycling!");
         }
 
-        Log.i("Listafter", String.valueOf(testList));
+        Log.i("ListLog", String.valueOf(testList));
 
         // Now we have three indexes which contain either true or false for our target activity. If
         // the threshold of 1 gets surpassed, and screen is on, we going to send a notification, as this means
@@ -126,6 +127,21 @@ public class DetectedActivitiesIntentService extends IntentService  {
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
+
+    private void isScreenOn() {
+        // create var context
+        Context context = getBaseContext();
+
+//        KeyguardManager myKM = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+//        if( myKM.inKeyguardRestrictedInputMode()) {
+//            //it is locked
+//            Log.i("ListLog","locked");
+//        } else {
+//            //it is not locked
+//            Log.i("ListLog","not locked");
+//        }
+
     }
 
     public void createNotification(){

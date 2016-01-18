@@ -370,4 +370,26 @@ public class MainActivity extends ActionBarActivity implements
     public void stopService() {
         stopService(new Intent(getBaseContext(), MyService.class));
     }
+
+    public class ScreenActivity {
+
+        public int returnScreen() {
+            IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+            registerReceiver(new BroadcastReceiver() {
+
+                String result;
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+                        Log.d("Screen", Intent.ACTION_SCREEN_OFF);
+                        return result =  "Screen is off";
+                    } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+                        Log.d("Screen", Intent.ACTION_SCREEN_ON);
+                    }
+                }
+            }, intentFilter);
+        }
+    }
 }
