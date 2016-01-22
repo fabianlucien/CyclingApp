@@ -22,6 +22,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -42,6 +43,10 @@ import java.util.List;
 public class DetectedActivitiesIntentService extends IntentService  {
 
     protected static final String TAG = "DetectedActivitiesIS";
+//    LatestActivities latestActivitiesList = new LatestActivities();
+
+    /** added code */
+    public static PowerManager powerManager;
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -56,6 +61,7 @@ public class DetectedActivitiesIntentService extends IntentService  {
     @Override
     public void onCreate() {
         super.onCreate();
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
     }
 
 
@@ -67,7 +73,7 @@ public class DetectedActivitiesIntentService extends IntentService  {
      */
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    public void onHandleIntent(Intent intent) {
 
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION);
@@ -75,12 +81,9 @@ public class DetectedActivitiesIntentService extends IntentService  {
         // Get the list of the probable activities associated with the current state of the
         // device. Each activity is associated with a confidence level, which is an int between
         // 0 and 100.
+
         ArrayList<DetectedActivity> detectedActivities = (ArrayList) result.getProbableActivities();
         ArrayList<RegisteredActivity> registeredActivitiesArr = new ArrayList<RegisteredActivity>();
-
-        List<Integer> testList = LatestActivities.latestActivitiesList;
-
-        Log.i("List", String.valueOf(testList));
 
         for (DetectedActivity da : detectedActivities) {
 
@@ -96,52 +99,33 @@ public class DetectedActivitiesIntentService extends IntentService  {
 
         // Logging all activities in one entry
 
-            for (int i = 0; i < registeredActivitiesArr.size(); i++) {
-                Log.i("ListLog", registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
-            }
-
-        isScreenOn();
-
-        // Old data entry is moved up one index. The oldest entry is removed by moving up the indexes.
-
-        testList.set(2, testList.get(1)); // move index 0 to index 1
-        testList.set(1, testList.get(0)); // move index 1 to index 2
-
-        Log.i("List", registeredActivitiesArr.get(0).getName().getClass().getName());
-        String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
-
-        if (activityWithHighestValue.equals("On a bicycle")){
-            Log.i("Listtest", "Cycling!");
-            testList.set(0, 1);  // if the newest activity is our target activity, set true
-        } else {
-            testList.set(0, 0); // if the newest activity is not our target activity, set false
-            Log.i("Listtest", "Not cycling!");
+        for (int i = 0; i < registeredActivitiesArr.size(); i++) {
+            Log.i("GeneralTestLog act", registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
         }
 
-        Log.i("ListLog", String.valueOf(testList));
+        String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
+        String targetActivity = "Still"; // On a bicycle
 
-        // Now we have three indexes which contain either true or false for our target activity. If
-        // the threshold of 1 gets surpassed, and screen is on, we going to send a notification, as this means
-        // that the target activity is being performed by the user for the past few seconds
+        if (activityWithHighestValue.equals(targetActivity)){
+            MainActivity.latestActivitiesList.updateLatestActivies(1);
+        } else {
+            MainActivity.latestActivitiesList.updateLatestActivies(0);
+        }
+
+        int sumOfActivities = MainActivity.latestActivitiesList.sumOfActivities();
+        boolean screenState = ScreenState.returnScreenState(powerManager);
+
+        if (sumOfActivities > 0 && screenState) {
+            createNotification();
+        }
+
+        Log.i("GeneralTestLog sum", String.valueOf(sumOfActivities));
+        Log.i("GeneralTestLog list", String.valueOf(MainActivity.latestActivitiesList.getLatestActivitiesList()));
+        Log.i("GeneralTestLog screen", String.valueOf(screenState));
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
-    }
-
-    private void isScreenOn() {
-        // create var context
-        Context context = getBaseContext();
-
-//        KeyguardManager myKM = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-//        if( myKM.inKeyguardRestrictedInputMode()) {
-//            //it is locked
-//            Log.i("ListLog","locked");
-//        } else {
-//            //it is not locked
-//            Log.i("ListLog","not locked");
-//        }
-
     }
 
     public void createNotification(){
@@ -176,6 +160,13 @@ public class DetectedActivitiesIntentService extends IntentService  {
         }
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         nm.notify(0, notification);
+    }
+
+    public Integer sum(List<Integer> list) {
+        Integer sum= 0;
+        for (Integer i:list)
+            sum = sum + i;
+        return sum;
     }
 }
 

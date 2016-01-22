@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -63,8 +64,7 @@ public class MainActivity extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status> {
 
     protected static final String TAG = "MainActivity";
-    public String testString = "test";
-
+    public static LatestActivities latestActivitiesList = new LatestActivities();
     /**
      * A receiver for DetectedActivity objects broadcast by the
      * {@code ActivityDetectionIntentService}.
@@ -80,6 +80,7 @@ public class MainActivity extends ActionBarActivity implements
     private Button mRequestActivityUpdatesButton;
     private Button mRemoveActivityUpdatesButton;
     private ListView mDetectedActivitiesListView;
+
 
     /**
      * Adapter backed by a list of DetectedActivity objects.
@@ -369,27 +370,5 @@ public class MainActivity extends ActionBarActivity implements
     // Method to stop the service
     public void stopService() {
         stopService(new Intent(getBaseContext(), MyService.class));
-    }
-
-    public class ScreenActivity {
-
-        public int returnScreen() {
-            IntentFilter intentFilter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-            registerReceiver(new BroadcastReceiver() {
-
-                String result;
-
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-                        Log.d("Screen", Intent.ACTION_SCREEN_OFF);
-                        return result =  "Screen is off";
-                    } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
-                        Log.d("Screen", Intent.ACTION_SCREEN_ON);
-                    }
-                }
-            }, intentFilter);
-        }
     }
 }
