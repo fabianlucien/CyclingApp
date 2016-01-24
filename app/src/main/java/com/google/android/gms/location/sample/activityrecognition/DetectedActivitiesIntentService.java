@@ -17,22 +17,17 @@
 package com.google.android.gms.location.sample.activityrecognition;
 
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.PowerManager;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  *  IntentService for handling incoming intents that are generated as a result of requesting
@@ -43,11 +38,10 @@ import java.util.List;
 public class DetectedActivitiesIntentService extends IntentService  {
 
     protected static final String TAG = "DetectedActivitiesIS";
-//    LatestActivities latestActivitiesList = new LatestActivities();
+
 
     /** added code */
     public static PowerManager powerManager;
-
     /**
      * This constructor is required, and calls the super IntentService(String)
      * constructor with the name for a worker thread.
@@ -61,7 +55,7 @@ public class DetectedActivitiesIntentService extends IntentService  {
     @Override
     public void onCreate() {
         super.onCreate();
-        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        powerManager = (PowerManager) getSystemService(POWER_SERVICE);
     }
 
 
@@ -77,6 +71,9 @@ public class DetectedActivitiesIntentService extends IntentService  {
 
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION);
+
+        Context context = getApplicationContext();
+
 
         // Get the list of the probable activities associated with the current state of the
         // device. Each activity is associated with a confidence level, which is an int between
@@ -104,7 +101,7 @@ public class DetectedActivitiesIntentService extends IntentService  {
         }
 
         String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
-        String targetActivity = "Still"; // On a bicycle
+        String targetActivity = "In a vehicle"; // On a bicycle
 
         if (activityWithHighestValue.equals(targetActivity)){
             MainActivity.latestActivitiesList.updateLatestActivies(1);
@@ -115,58 +112,36 @@ public class DetectedActivitiesIntentService extends IntentService  {
         int sumOfActivities = MainActivity.latestActivitiesList.sumOfActivities();
         boolean screenState = ScreenState.returnScreenState(powerManager);
 
-        if (sumOfActivities > 0 && screenState) {
-            createNotification();
+        if (sumOfActivities > 0 && screenState && !MainActivity.notificationSendForSession) {
+            Notification.showNotification(context, "Test", "testmessage");
+            MainActivity.notificationSendForSession = true;
+            TimerClass.start();
+        } else if (!screenState){
+            MainActivity.notificationSendForSession = false;
         }
+
+        // I still think that there should be a separate function that will listen to on or off screen events
+        // This might no be working ideally
+        // Also, reconsider how we tracking on / off screen, it's dependent of this Intentservices
+        // alternative might be:
+        // if sumOfActivies && !screenRecognitionRunning -> screenRecognitionRunning()
+        // if (ScreenIsON) -> send notification, notificationSendIsTrue, startTimeTrackingTillScreenOff
+        // NA: Draw this function on a sheet of paper and program
+
+//       TimerClass myTask = new TimerClass();
+//       Timer myTimer = new Timer();
+//       myTimer.schedule(myTask, 1000, 1000); // this is working
+
+
 
         Log.i("GeneralTestLog sum", String.valueOf(sumOfActivities));
         Log.i("GeneralTestLog list", String.valueOf(MainActivity.latestActivitiesList.getLatestActivitiesList()));
         Log.i("GeneralTestLog screen", String.valueOf(screenState));
+        Log.i("GeneralTestlog session", String.valueOf(MainActivity.notificationSendForSession));
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
-    }
-
-    public void createNotification(){
-
-        Log.i("Noti", "Send");
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        Intent i = new Intent(this, MainActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);  //If set, the activity will not be launched if it is already running at the top of the history stack.
-        PendingIntent intent = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(intent);
-
-
-        builder.setTicker("Please stop cycling"); // normally, a xml resource would be here
-        builder.setSmallIcon(R.drawable.ic_launcher);
-        builder.setAutoCancel(true); // remove all previous notifications
-        builder.setPriority(android.app.Notification.PRIORITY_MAX); // notification is hovering and on lock screen
-
-        android.app.Notification notification = builder.build();
-
-        RemoteViews contentview = new RemoteViews(getPackageName(), R.layout.notification);
-
-        final String text = "This is text"; // Nexus6, api23: this is the text that is set for the notification
-        contentview.setTextViewText(R.id.textView, text);
-
-        notification.contentView = contentview;
-
-        if (Build.VERSION.SDK_INT >=16){
-            RemoteViews expendedView =
-                    new RemoteViews(getPackageName(), R.layout.notification_expanded);
-            notification.bigContentView = expendedView;
-        }
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(0, notification);
-    }
-
-    public Integer sum(List<Integer> list) {
-        Integer sum= 0;
-        for (Integer i:list)
-            sum = sum + i;
-        return sum;
     }
 }
 

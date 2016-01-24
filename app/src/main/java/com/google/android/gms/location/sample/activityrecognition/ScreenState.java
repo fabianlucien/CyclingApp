@@ -8,8 +8,6 @@ import android.os.PowerManager;
 public class ScreenState {
 
     private static boolean screenOn;
-    PowerManager pm = DetectedActivitiesIntentService.powerManager;
-
 
     public static boolean returnScreenState(PowerManager pm){
         // With context, you get global information about an application's environment
