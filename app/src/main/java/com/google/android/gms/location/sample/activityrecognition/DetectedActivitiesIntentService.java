@@ -28,6 +28,8 @@ import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
 
+import cyclingBehavior.Notification;
+
 
 /**
  *  IntentService for handling incoming intents that are generated as a result of requesting
@@ -35,7 +37,7 @@ import java.util.ArrayList;
  *  {@link com.google.android.gms.location.ActivityRecognitionApi#requestActivityUpdates}.
  */
 
-public class DetectedActivitiesIntentService extends IntentService  {
+public class DetectedActivitiesIntentService extends IntentService {
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -120,13 +122,6 @@ public class DetectedActivitiesIntentService extends IntentService  {
             MainActivity.notificationSendForSession = false;
         }
 
-        // I still think that there should be a separate function that will listen to on or off screen events
-        // This might no be working ideally
-        // Also, reconsider how we tracking on / off screen, it's dependent of this Intentservices
-        // alternative might be:
-        // if sumOfActivies && !screenRecognitionRunning -> screenRecognitionRunning()
-        // if (ScreenIsON) -> send notification, notificationSendIsTrue, startTimeTrackingTillScreenOff
-        // NA: Draw this function on a sheet of paper and program
 
 //       TimerClass myTask = new TimerClass();
 //       Timer myTimer = new Timer();
