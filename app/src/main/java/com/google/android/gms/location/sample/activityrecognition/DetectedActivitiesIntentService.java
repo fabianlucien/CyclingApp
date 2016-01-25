@@ -23,12 +23,11 @@ import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.etletle.cyclingBehavior.Notification;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
-
-import cyclingBehavior.Notification;
 
 
 /**
@@ -122,12 +121,9 @@ public class DetectedActivitiesIntentService extends IntentService {
             MainActivity.notificationSendForSession = false;
         }
 
-
 //       TimerClass myTask = new TimerClass();
 //       Timer myTimer = new Timer();
 //       myTimer.schedule(myTask, 1000, 1000); // this is working
-
-
 
         Log.i("GeneralTestLog sum", String.valueOf(sumOfActivities));
         Log.i("GeneralTestLog list", String.valueOf(MainActivity.latestActivitiesList.getLatestActivitiesList()));

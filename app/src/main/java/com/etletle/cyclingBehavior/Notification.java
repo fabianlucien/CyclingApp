@@ -1,4 +1,4 @@
-package cyclingBehavior;
+package com.etletle.cyclingBehavior;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;

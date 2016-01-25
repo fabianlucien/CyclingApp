@@ -14,7 +14,7 @@ class TimerClass extends TimerTask {
     public static Timer myTimer = new Timer();
 
     public static void start(){
-        myTimer.schedule(myTask, 1000, 1000); // this is working
+        myTimer.schedule(myTask, 1000, 1000); // this is working, but giving an error because it says it's scheduled already 
     }
 
     @Override
