@@ -8,21 +8,19 @@ public class RegisteredActivity {
     String name;
     int percentage;
 
-    public String getName() {
-        return name;
+    public void setData(String name, int percentage){
+        this.name = name;
+        this.percentage = percentage;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getName() {
+        return name;
     }
 
     public int getPercentage() {
         return percentage;
     }
 
-    public void setPercentage(int percentage) {
-        this.percentage = percentage;
-    }
 }
 
 

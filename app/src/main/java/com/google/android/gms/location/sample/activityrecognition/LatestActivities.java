@@ -12,7 +12,7 @@ public class LatestActivities {
         return latestActivitiesList;
     }
 
-    public void updateLatestActivies(int newActivityValue) {
+    public void updateLatestActivities(int newActivityValue) {
 
         int listSize = latestActivitiesList.size();
 

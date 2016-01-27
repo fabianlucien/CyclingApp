@@ -1,4 +1,4 @@
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.cyclingBehavior;
 
 import android.os.PowerManager;
 

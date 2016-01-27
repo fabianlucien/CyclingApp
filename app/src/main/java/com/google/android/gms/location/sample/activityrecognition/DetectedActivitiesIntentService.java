@@ -23,7 +23,7 @@ import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.etletle.cyclingBehavior.Notification;
+import com.etletle.cyclingBehavior.Main;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
@@ -43,6 +43,8 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     /** added code */
     public static PowerManager powerManager;
+    public static Boolean sessionStarted = false;
+    public static Context context;
     /**
      * This constructor is required, and calls the super IntentService(String)
      * constructor with the name for a worker thread.
@@ -57,8 +59,9 @@ public class DetectedActivitiesIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        Log.i("GeneralTestLog", "DetectedAc created");
+        context = getApplicationContext();
     }
-
 
     /**
      * Handles incoming intents.
@@ -73,9 +76,6 @@ public class DetectedActivitiesIntentService extends IntentService {
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION);
 
-        Context context = getApplicationContext();
-
-
         // Get the list of the probable activities associated with the current state of the
         // device. Each activity is associated with a confidence level, which is an int between
         // 0 and 100.
@@ -88,10 +88,8 @@ public class DetectedActivitiesIntentService extends IntentService {
             String activityType = Constants.getActivityString(getApplicationContext(), da.getType()); // get activity type
             int activityConfidence = da.getConfidence();                                              // get confidence
 
-            RegisteredActivity registeredActivity = new RegisteredActivity(); // create registeredActivity object
-            registeredActivity.setName(activityType);              // add name to object
-            registeredActivity.setPercentage(activityConfidence); // add confidence percentage to object
-
+            RegisteredActivity registeredActivity = new RegisteredActivity();
+            registeredActivity.setData(activityType, activityConfidence);
             registeredActivitiesArr.add(registeredActivity); // add the registered activity to an array
         }
 
@@ -102,33 +100,30 @@ public class DetectedActivitiesIntentService extends IntentService {
         }
 
         String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
-        String targetActivity = "In a vehicle"; // On a bicycle
+        String targetActivity = "On a bicycle"; // On a bicycle
 
         if (activityWithHighestValue.equals(targetActivity)){
-            MainActivity.latestActivitiesList.updateLatestActivies(1);
+            MainActivity.latestActivitiesList.updateLatestActivities(1);
         } else {
-            MainActivity.latestActivitiesList.updateLatestActivies(0);
+            MainActivity.latestActivitiesList.updateLatestActivities(0);
         }
 
         int sumOfActivities = MainActivity.latestActivitiesList.sumOfActivities();
-        boolean screenState = ScreenState.returnScreenState(powerManager);
 
-        if (sumOfActivities > 0 && screenState && !MainActivity.notificationSendForSession) {
-            Notification.showNotification(context, "Test", "testmessage");
-            MainActivity.notificationSendForSession = true;
-            TimerClass.start();
-        } else if (!screenState){
-            MainActivity.notificationSendForSession = false;
+        Log.i("General", "Before if: " + String.valueOf(sessionStarted));
+
+        if (sumOfActivities > 0 && !sessionStarted){
+            Main.startCyclingBehaviorListener(context, powerManager);
+            sessionStarted = true;
+        } else if (sumOfActivities == 0 && sessionStarted){
+            Main.stopCyclingBehaviorListener(context);
+            sessionStarted = false;
         }
 
-//       TimerClass myTask = new TimerClass();
-//       Timer myTimer = new Timer();
-//       myTimer.schedule(myTask, 1000, 1000); // this is working
+        Log.i("General", "After if: " + String.valueOf(sessionStarted));
 
         Log.i("GeneralTestLog sum", String.valueOf(sumOfActivities));
         Log.i("GeneralTestLog list", String.valueOf(MainActivity.latestActivitiesList.getLatestActivitiesList()));
-        Log.i("GeneralTestLog screen", String.valueOf(screenState));
-        Log.i("GeneralTestlog session", String.valueOf(MainActivity.notificationSendForSession));
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);

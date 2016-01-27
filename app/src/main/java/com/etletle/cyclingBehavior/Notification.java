@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.google.android.gms.location.sample.activityrecognition.MainActivity;
 import com.google.android.gms.location.sample.activityrecognition.R;
@@ -16,6 +17,15 @@ public class Notification {
 
     public static void showNotification(Context context, String title, String message) {
 
+        cancelNotification(context, 0);
+
+        NotificationManager notificationManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.cancelAll();
+
+        Log.i("General", "Notification send!");
+
         int icon = R.drawable.cast_ic_notification_on;
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -25,7 +35,7 @@ public class Notification {
         android.app.Notification notification = builder.setSmallIcon(icon)
                 .setTicker(title)
                 .setWhen(0)
-                .setAutoCancel(true) // remove previous notifications
+                .setAutoCancel(true) // on tap, remove the notification
                 .setContentTitle(title)
                 .setStyle(inboxStyle)
                 .setContentIntent(resultPendingIntent)
@@ -33,8 +43,17 @@ public class Notification {
                 .setPriority(android.app.Notification.PRIORITY_HIGH)
                 .build();
 
-        NotificationManager notificationManager = (NotificationManager)
-                context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, notification);
+        notificationManager.notify(1, notification);
+    }
+
+    public static void cancelNotification(Context ctx, int notifyId) {
+
+        if (notifyId == 0) {
+            return;
+        } else {
+            String ns = Context.NOTIFICATION_SERVICE;
+            NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
+            nMgr.cancel(notifyId);
+        }
     }
 }

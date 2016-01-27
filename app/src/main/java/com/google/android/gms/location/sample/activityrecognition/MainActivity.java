@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.etletle.cyclingBehavior.Main;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -64,7 +65,9 @@ public class MainActivity extends ActionBarActivity implements
 
     protected static final String TAG = "MainActivity";
     public static LatestActivities latestActivitiesList = new LatestActivities();
-    public static boolean notificationSendForSession = false;
+    public static boolean isOn = false;
+    public static boolean cyclingThreadIsRunning = false;
+
     /**
      * A receiver for DetectedActivity objects broadcast by the
      * {@code ActivityDetectionIntentService}.
@@ -80,7 +83,6 @@ public class MainActivity extends ActionBarActivity implements
     private Button mRequestActivityUpdatesButton;
     private Button mRemoveActivityUpdatesButton;
     private ListView mDetectedActivitiesListView;
-
 
     /**
      * Adapter backed by a list of DetectedActivity objects.
@@ -278,6 +280,27 @@ public class MainActivity extends ActionBarActivity implements
      * Gets a PendingIntent to be sent for each activity detection.
      */
     private PendingIntent getActivityDetectionPendingIntent() {
+
+        // when isOn means that the app is turned off and on again.
+        // when turning of, change state of on/off, stop a current sessions if it's running and stop the cycling thread
+        if (isOn){
+            isOn = false;
+            DetectedActivitiesIntentService.sessionStarted = false;
+
+            if (cyclingThreadIsRunning) {
+                Main.thread.interrupt(); // only kill this if it already exists
+                Main.notificationSendForSession = false;
+                Main.screenStateCycleStarted = false;
+                latestActivitiesList.resetLatestActivitiesList();
+                Log.i("General kill", String.valueOf(Main.screenStateCycleStarted));
+            }
+
+        } else {
+            isOn = true;
+            latestActivitiesList.resetLatestActivitiesList();
+            Log.i("GeneralTestLog rist", String.valueOf(MainActivity.latestActivitiesList.getLatestActivitiesList()));
+        }
+
         Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
