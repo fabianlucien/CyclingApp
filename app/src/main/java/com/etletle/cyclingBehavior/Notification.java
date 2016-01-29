@@ -41,6 +41,7 @@ public class Notification {
                 .setContentIntent(resultPendingIntent)
                 .setContentText(message)
                 .setPriority(android.app.Notification.PRIORITY_HIGH)
+//                .addAction(R.drawable.cast_ic_notification_on, "Call", pIntent)
                 .build();
 
         notificationManager.notify(1, notification);

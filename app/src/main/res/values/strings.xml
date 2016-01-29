@@ -16,7 +16,7 @@
 -->
 <resources>
 
-    <string name="app_name">Activity Recognition</string>
+    <string name="app_name"></string>
 
     <!-- Activity detection strings -->
     <string name="in_vehicle">In a vehicle</string>
@@ -31,8 +31,8 @@
 
     <string name="detected_activities_title">Detected Activities</string>
 
-    <string name="request_activity_updates">Request updates</string>
-    <string name="remove_activity_updates">Remove updates</string>
+    <string name="request_activity_updates">Start app</string>
+    <string name="remove_activity_updates">Stop app</string>
     <string name="activity_updates_added">Activity updates added</string>
     <string name="activity_updates_removed">Activity updates removed</string>
 

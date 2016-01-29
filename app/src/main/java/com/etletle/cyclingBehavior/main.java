@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.Vibrator;
 import android.util.Log;
 
 import com.google.android.gms.location.sample.activityrecognition.MainActivity;
@@ -50,6 +49,7 @@ public class Main extends Activity {
                         // if screen is on and no notification has been send yet, send a notification and
                         // assess if the notification has been successful.
                         if (screenState && !notificationSendForSession){
+
 
                             notificationSendForSession = true;
                             Notification notification = new Notification();
@@ -122,8 +122,8 @@ public class Main extends Activity {
 
         if (last && secondLast || !last && secondLast || last && !secondLast){
 
-            Vibrator v = (Vibrator) contextTest.getSystemService(Context.VIBRATOR_SERVICE);
-            v.vibrate(500);
+//            Vibrator v = (Vibrator) contextTest.getSystemService(Context.VIBRATOR_SERVICE);
+//            v.vibrate(500);
             Log.i("General", "I was called");
 //             the screen was on for the last two seconds
 //             send unsuccessful to the db

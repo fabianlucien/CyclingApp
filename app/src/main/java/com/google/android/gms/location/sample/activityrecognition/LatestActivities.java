@@ -6,7 +6,7 @@ import java.util.List;
 
 public class LatestActivities {
 
-   public List<Integer> latestActivitiesList = Arrays.asList(0, 0, 0, 0); // The four latest activities are logged. 0 is false, 1 is true
+   public List<Integer> latestActivitiesList = Arrays.asList(0, 0); // The two latest activities are logged. 0 is false, 1 is true
 
     public List<Integer> getLatestActivitiesList() {
         return latestActivitiesList;

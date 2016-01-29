@@ -24,7 +24,7 @@
     android:paddingTop="@dimen/activity_vertical_margin">
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
         <Button
@@ -35,7 +35,12 @@
             android:layout_alignParentStart="true"
             android:layout_marginTop="@dimen/narrow_space"
             android:onClick="requestActivityUpdatesButtonHandler"
-            android:text="@string/request_activity_updates" />
+            android:text="@string/request_activity_updates"
+            android:clickable="true"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
+            android:layout_marginRight="10dp"
+            android:textColor="#009688" />
 
         <Button
             android:id="@+id/remove_activity_updates_button"
@@ -43,11 +48,34 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_toRightOf="@id/request_activity_updates_button"
-            android:layout_toEndOf="@id/request_activity_updates_button"
+            android:layout_toEndOf="@+id/request_activity_updates_button"
             android:layout_marginTop="@dimen/narrow_space"
             android:onClick="removeActivityUpdatesButtonHandler"
-            android:text="@string/remove_activity_updates" />
+            android:text="@string/remove_activity_updates"
+            android:focusable="false"
+            android:textColor="#F44336"
+            android:layout_toRightOf="@+id/request_activity_updates_button" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="71dp"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NOTIFICATION WAS FALSE"
+            android:id="@+id/button_test"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:onClick="flagNotificationAsFalse"
+            android:clickable="true"
+            android:textColor="#212121"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
     </RelativeLayout>
 
     <TextView

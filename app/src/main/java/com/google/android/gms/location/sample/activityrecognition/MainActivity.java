@@ -32,6 +32,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.etletle.cyclingBehavior.Main;
+import com.etletle.cyclingBehavior.Notification;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -139,6 +140,8 @@ public class MainActivity extends ActionBarActivity implements
 
         // Kick off the request to build GoogleApiClient.
         buildGoogleApiClient();
+
+
     }
 
     /**
@@ -292,13 +295,14 @@ public class MainActivity extends ActionBarActivity implements
                 Main.notificationSendForSession = false;
                 Main.screenStateCycleStarted = false;
                 latestActivitiesList.resetLatestActivitiesList();
+                Context context = getApplicationContext(); // remove excisting notifications
+                Notification.cancelNotification(context, 1);
                 Log.i("General kill", String.valueOf(Main.screenStateCycleStarted));
             }
 
         } else {
             isOn = true;
             latestActivitiesList.resetLatestActivitiesList();
-            Log.i("GeneralTestLog rist", String.valueOf(MainActivity.latestActivitiesList.getLatestActivitiesList()));
         }
 
         Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
@@ -395,4 +399,9 @@ public class MainActivity extends ActionBarActivity implements
     public void stopService() {
         stopService(new Intent(getBaseContext(), MyService.class));
     }
+
+    public void flagNotificationAsFalse(View view){
+        Log.i("General", "This is false notification");
+    }
+
 }
