@@ -24,10 +24,12 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.etletle.cyclingBehavior.Main;
+import com.etletle.cyclingBehavior.RegisteredActivity;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -40,10 +42,8 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     protected static final String TAG = "DetectedActivitiesIS";
 
-
     /** added code */
     public static PowerManager powerManager;
-    public static Boolean sessionStarted = false;
     public static Context context;
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -59,7 +59,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        Log.i("GeneralTestLog", "DetectedAc created");
+        Log.i("Testlog", "A new round of activities are logged");
         context = getApplicationContext();
     }
 
@@ -73,6 +73,11 @@ public class DetectedActivitiesIntentService extends IntentService {
     @Override
     public void onHandleIntent(Intent intent) {
 
+        // Added
+        boolean sessionStarted =  MainActivity.user.isCyclingThreadStartedForUser();
+        ArrayList<RegisteredActivity> registeredActivitiesArr = new ArrayList<RegisteredActivity>();
+        //
+
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
         Intent localIntent = new Intent(Constants.BROADCAST_ACTION);
 
@@ -81,7 +86,6 @@ public class DetectedActivitiesIntentService extends IntentService {
         // 0 and 100.
 
         ArrayList<DetectedActivity> detectedActivities = (ArrayList) result.getProbableActivities();
-        ArrayList<RegisteredActivity> registeredActivitiesArr = new ArrayList<RegisteredActivity>();
 
         for (DetectedActivity da : detectedActivities) {
 
@@ -96,34 +100,36 @@ public class DetectedActivitiesIntentService extends IntentService {
         // Logging all activities in one entry
 
         for (int i = 0; i < registeredActivitiesArr.size(); i++) {
-            Log.i("GeneralTestLog act", registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
+            Log.i("Testlog", "This is an activity: " +  registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
         }
 
         String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
         String targetActivity = "On a bicycle"; // On a bicycle
 
         if (activityWithHighestValue.equals(targetActivity)){
-            MainActivity.latestActivitiesList.updateLatestActivities(1);
+            MainActivity.user.getUserLatestActivitiesList().updateLatestActivities(1);
         } else {
-            MainActivity.latestActivitiesList.updateLatestActivities(0);
+            MainActivity.user.getUserLatestActivitiesList().updateLatestActivities(0);
         }
 
-        int sumOfActivities = MainActivity.latestActivitiesList.sumOfActivities();
+        int sumOfActivities = MainActivity.user.getUserLatestActivitiesList().sumOfActivities();
+        Log.i("Testlog", "Sum of activities is: " + String.valueOf(sumOfActivities));
 
-        Log.i("General", "Before if: " + String.valueOf(sessionStarted));
+        Log.i("Testlog", "Has the session started? :  " + String.valueOf(sessionStarted));
 
-        if (sumOfActivities > 0 && !sessionStarted){
-            Main.startCyclingBehaviorListener(context, powerManager);
-            sessionStarted = true;
+        if (sumOfActivities > 0 && !sessionStarted){                    // if alreadyStarted, do not start a new listener
+            Main.startCyclingSession(context, powerManager);
         } else if (sumOfActivities == 0 && sessionStarted){
-            Main.stopCyclingBehaviorListener(context);
-            sessionStarted = false;
+            Main.stopCyclingSession(context);
         }
 
-        Log.i("General", "After if: " + String.valueOf(sessionStarted));
+        sessionStarted =  MainActivity.user.isCyclingThreadStartedForUser();
+        Log.i("Testlog", "Has the session started? : " + String.valueOf(sessionStarted));
 
-        Log.i("GeneralTestLog sum", String.valueOf(sumOfActivities));
-        Log.i("GeneralTestLog list", String.valueOf(MainActivity.latestActivitiesList.getLatestActivitiesList()));
+
+        List activitiesList = MainActivity.user.getUserLatestActivitiesList().getLatestActivitiesList();
+
+        Log.i("Testlog", "This is the activitieslist: " + String.valueOf(activitiesList)); // tthis is the activiesList
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);

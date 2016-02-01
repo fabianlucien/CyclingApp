@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -32,7 +33,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.etletle.cyclingBehavior.Main;
-import com.etletle.cyclingBehavior.Notification;
+import com.etletle.cyclingBehavior.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -65,9 +66,10 @@ public class MainActivity extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status> {
 
     protected static final String TAG = "MainActivity";
-    public static LatestActivities latestActivitiesList = new LatestActivities();
-    public static boolean isOn = false;
-    public static boolean cyclingThreadIsRunning = false;
+//    public static LatestActivities latestActivitiesList = new LatestActivities();
+//    public static boolean isOn;
+//    public static boolean cyclingThreadIsRunning = false;
+    public static User user;
 
     /**
      * A receiver for DetectedActivity objects broadcast by the
@@ -100,6 +102,9 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        user = new User();
+        Log.i("general", user.getUserId());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
@@ -140,6 +145,15 @@ public class MainActivity extends ActionBarActivity implements
 
         // Kick off the request to build GoogleApiClient.
         buildGoogleApiClient();
+
+        // temp code to get feedback by e-mail
+
+        Button startBtn = (Button) findViewById(R.id.sendEmail);
+        startBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                sendEmail();
+            }
+        });
 
 
     }
@@ -284,25 +298,17 @@ public class MainActivity extends ActionBarActivity implements
      */
     private PendingIntent getActivityDetectionPendingIntent() {
 
-        // when isOn means that the app is turned off and on again.
-        // when turning of, change state of on/off, stop a current sessions if it's running and stop the cycling thread
-        if (isOn){
-            isOn = false;
-            DetectedActivitiesIntentService.sessionStarted = false;
+        Log.i("bugFix", String.valueOf(user.isCyclingThreadStartedForUser()));
 
-            if (cyclingThreadIsRunning) {
-                Main.thread.interrupt(); // only kill this if it already exists
-                Main.notificationSendForSession = false;
-                Main.screenStateCycleStarted = false;
-                latestActivitiesList.resetLatestActivitiesList();
-                Context context = getApplicationContext(); // remove excisting notifications
-                Notification.cancelNotification(context, 1);
-                Log.i("General kill", String.valueOf(Main.screenStateCycleStarted));
-            }
+        // the if stament makes sure correct actions are taken when an app is turned on and off
+
+        if (!user.isAppIsOn()){
+            Context context = getApplicationContext();
+            Main.stopCyclingSession(context);
+            user.setAppIsOn(false);
 
         } else {
-            isOn = true;
-            latestActivitiesList.resetLatestActivitiesList();
+            user.setAppIsOn(true);
         }
 
         Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
@@ -321,10 +327,17 @@ public class MainActivity extends ActionBarActivity implements
         if (getUpdatesRequestedState()) {
             mRequestActivityUpdatesButton.setEnabled(false);
             mRemoveActivityUpdatesButton.setEnabled(true);
+            user.setAppIsOn(false);
+            Log.i("Testlog", "The start button is off, the stop button is on");
+            Log.i("Testlog", "----");
         } else {
             mRequestActivityUpdatesButton.setEnabled(true);
             mRemoveActivityUpdatesButton.setEnabled(false);
+            user.setAppIsOn(true);
+            Log.i("Testlog", "The start button is on, the stop button is off");
+            Log.i("Testlog", "----");
         }
+
     }
 
     /**
@@ -390,18 +403,28 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
-    // Method to start the service
-    public void startService() {
-        startService(new Intent(getBaseContext(), MyService.class));
-    }
+    protected void sendEmail() {
+        Log.i("Send email", "");
+        String[] TO = {"bongosart@gmail.com"};
+        String[] CC = {""};
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        String subject = "Feedback version v0.1.0";
 
-    // Method to stop the service
-    public void stopService() {
-        stopService(new Intent(getBaseContext(), MyService.class));
-    }
+        emailIntent.setData(Uri.parse("mailto:"));
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, TO);
+        emailIntent.putExtra(Intent.EXTRA_CC, CC);
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Thanks for providing feedback!");
 
-    public void flagNotificationAsFalse(View view){
-        Log.i("General", "This is false notification");
+        try {
+            startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+            finish();
+
+        }
+        catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(MainActivity.this, "There is no email client installed.", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

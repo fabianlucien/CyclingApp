@@ -17,14 +17,10 @@ public class Notification {
 
     public static void showNotification(Context context, String title, String message) {
 
-        cancelNotification(context, 0);
-
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.cancelAll();
-
-        Log.i("General", "Notification send!");
+        notificationManager.cancel(1);
 
         int icon = R.drawable.cast_ic_notification_on;
         Intent intent = new Intent(context, MainActivity.class);
@@ -41,10 +37,10 @@ public class Notification {
                 .setContentIntent(resultPendingIntent)
                 .setContentText(message)
                 .setPriority(android.app.Notification.PRIORITY_HIGH)
-//                .addAction(R.drawable.cast_ic_notification_on, "Call", pIntent)
                 .build();
 
         notificationManager.notify(1, notification);
+        Log.i("TestLog", "Notification send!");
     }
 
     public static void cancelNotification(Context ctx, int notifyId) {

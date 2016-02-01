@@ -1,4 +1,4 @@
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.cyclingBehavior;
 
 /**
  * Created by FabianLucien on 1/9/16.
