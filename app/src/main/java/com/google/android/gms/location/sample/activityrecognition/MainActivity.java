@@ -35,8 +35,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.etletle.cyclingBehavior.Database;
-import com.etletle.cyclingBehavior.Main;
+import com.etletle.cyclingBehavior.Notification;
 import com.etletle.cyclingBehavior.User;
+import com.etletle.threads.CyclingThread;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -72,6 +73,8 @@ public class MainActivity extends ActionBarActivity implements
     protected static final String TAG = "MainActivity";
     public static User user;
     public static Database database;
+    public static CyclingThread cyclingThread;
+
 
     /**
      * A receiver for DetectedActivity objects broadcast by the
@@ -318,17 +321,6 @@ public class MainActivity extends ActionBarActivity implements
      */
     private PendingIntent getActivityDetectionPendingIntent() {
 
-        // the if statement makes sure correct actions are taken when an app is turned on and off
-
-        if (!user.isAppIsOn()){
-//            Context context = getApplicationContext();
-//            Main.stopCyclingSession(context);
-            user.setAppIsOn(false);
-
-        } else {
-            user.setAppIsOn(true);
-        }
-
         Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
 
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
@@ -346,17 +338,27 @@ public class MainActivity extends ActionBarActivity implements
             mRequestActivityUpdatesButton.setEnabled(false);
             mRemoveActivityUpdatesButton.setEnabled(true);
             user.setAppIsOn(false);
-            Log.i("Testlog", "The start button is off, the stop button is on");
+            Log.i("TestLog", "The start button cannot be pressed, the stop button can be pressed");
 
-            Log.i("Testlog", "----");
         } else {
             mRequestActivityUpdatesButton.setEnabled(true);
             mRemoveActivityUpdatesButton.setEnabled(false);
-            Context context = getApplicationContext();
-            Main.stopCyclingSession(context);
+
+            if (MainActivity.cyclingThread != null){
+                try {
+                    MainActivity.cyclingThread.stopCyclingThread();
+                    MainActivity.cyclingThread = null;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
             user.setAppIsOn(true);
-            Log.i("Testlog", "The start button is on, the stop button is off");
-            Log.i("Testlog", "----");
+            Context context = getApplicationContext();
+            Notification.cancelNotification(context, 1);
+            user.getUserLatestActivitiesList().resetLatestActivitiesList(); // when the user starts the app again, the user starts with a new latest activities list
+            Log.i("TestLog", "The start button can be pressed, the stop button cannot be pressed");
+
         }
 
     }
