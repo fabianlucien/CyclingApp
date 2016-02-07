@@ -10,6 +10,7 @@ import com.google.android.gms.location.sample.activityrecognition.MainActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by FabianLucien on 1/25/16.
@@ -43,7 +44,7 @@ public class Main extends Activity {
 
                     boolean cyclingThreadStartedForUser =  MainActivity.user.isCyclingThreadStartedForUser();
 
-                    while(cyclingThreadStartedForUser) {
+                    while(cyclingThreadStartedForUser && !Thread.currentThread().isInterrupted()) {
                         screenState = ScreenState.returnScreenState(pm);
                         cyclingThreadStartedForUser =  MainActivity.user.isCyclingThreadStartedForUser();
 
@@ -66,6 +67,15 @@ public class Main extends Activity {
 
                         cyclingThreadStartedForUser =  MainActivity.user.isCyclingThreadStartedForUser();
                         sleep(1000);
+
+                        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+                        Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+
+
+                        Log.i("Testlog", String.valueOf(threadArray.length));
+                        MainActivity.logHeap();
+
+
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -73,12 +83,20 @@ public class Main extends Activity {
                 }}};
 
         MainActivity.user.cyclingThread.start();
-
     }
 
-    public static void stopCyclingSession(Context context){
+    public static void stopCyclingSession(Context context) throws InterruptedException {
 
         boolean cyclingThreadStartedForUser = MainActivity.user.isCyclingThreadStartedForUser();
+
+        if (MainActivity.user.getCyclingThread() != null) {
+            if (!MainActivity.user.cyclingThread.isInterrupted()) {
+                MainActivity.user.cyclingThread.sleep(1000); // needs sleep to interrupt
+                MainActivity.user.cyclingThread.interrupt();
+                MainActivity.user.cyclingThread.join();
+
+            }
+        }
 
         if (cyclingThreadStartedForUser){
             MainActivity.user.setCyclingThreadStartedForUser(false);                        // we stop the thread

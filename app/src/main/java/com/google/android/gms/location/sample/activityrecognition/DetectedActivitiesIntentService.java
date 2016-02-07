@@ -45,7 +45,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     /** added code */
     public static PowerManager powerManager;
     public static Context context;
-    /**
+   /**
      * This constructor is required, and calls the super IntentService(String)
      * constructor with the name for a worker thread.
      */
@@ -59,7 +59,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        Log.i("Testlog", "A new round of activities are logged");
+        Log.i("TestLog", "A new round of activities are logged");
         context = getApplicationContext();
     }
 
@@ -73,8 +73,6 @@ public class DetectedActivitiesIntentService extends IntentService {
     @Override
     public void onHandleIntent(Intent intent) {
 
-        // Added
-        boolean sessionStarted =  MainActivity.user.isCyclingThreadStartedForUser();
         ArrayList<RegisteredActivity> registeredActivitiesArr = new ArrayList<RegisteredActivity>();
         //
 
@@ -100,11 +98,11 @@ public class DetectedActivitiesIntentService extends IntentService {
         // Logging all activities in one entry
 
         for (int i = 0; i < registeredActivitiesArr.size(); i++) {
-            Log.i("Testlog", "This is an activity: " +  registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
+            Log.i("TestLog", "This is an activity: " +  registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
         }
 
         String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
-        String targetActivity = "On a bicycle"; // On a bicycle
+        String targetActivity = "Still"; // On a bicycle
 
         if (activityWithHighestValue.equals(targetActivity)){
             MainActivity.user.getUserLatestActivitiesList().updateLatestActivities(1);
@@ -113,23 +111,26 @@ public class DetectedActivitiesIntentService extends IntentService {
         }
 
         int sumOfActivities = MainActivity.user.getUserLatestActivitiesList().sumOfActivities();
-        Log.i("Testlog", "Sum of activities is: " + String.valueOf(sumOfActivities));
+        Log.i("TestLog", "Sum of activities is: " + String.valueOf(sumOfActivities));
 
-        Log.i("Testlog", "Has the session started? :  " + String.valueOf(sessionStarted));
+        Log.i("TestLog", "Has the session started? :  " + String.valueOf(MainActivity.user.isCyclingThreadStartedForUser()));
 
-        if (sumOfActivities > 0 && !sessionStarted){                    // if alreadyStarted, do not start a new listener
+        if (sumOfActivities > 0 && !MainActivity.user.isCyclingThreadStartedForUser()){                    // if alreadyStarted, do not start a new listener
             Main.startCyclingSession(context, powerManager);
-        } else if (sumOfActivities == 0 && sessionStarted){
-            Main.stopCyclingSession(context);
+        } else if (sumOfActivities == 0 && MainActivity.user.isCyclingThreadStartedForUser()){
+            try {
+                Main.stopCyclingSession(context);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
         }
 
-        sessionStarted =  MainActivity.user.isCyclingThreadStartedForUser();
-        Log.i("Testlog", "Has the session started? : " + String.valueOf(sessionStarted));
-
+        Log.i("TestLog", "Has the session started? : " + String.valueOf(MainActivity.user.isCyclingThreadStartedForUser()));
 
         List activitiesList = MainActivity.user.getUserLatestActivitiesList().getLatestActivitiesList();
 
-        Log.i("Testlog", "This is the activitieslist: " + String.valueOf(activitiesList)); // tthis is the activiesList
+        Log.i("TestLog", "This is the activitieslist: " + String.valueOf(activitiesList)); // tthis is the activiesList
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);

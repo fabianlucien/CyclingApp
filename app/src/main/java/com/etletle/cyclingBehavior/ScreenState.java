@@ -19,6 +19,7 @@ public class ScreenState {
         } else {
             screenOn = pm.isScreenOn();
         }
+
         return screenOn;
     }
 }

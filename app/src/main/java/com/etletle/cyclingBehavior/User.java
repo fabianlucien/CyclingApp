@@ -10,7 +10,7 @@ import java.util.Date;
 public class User {
 
 //    String userId = String.valueOf(UUID.randomUUID());
-    String userId = "testUser";
+    public long userId;
     Date userDate = new Date();
 
     boolean appIsOn = false;
@@ -64,11 +64,11 @@ public class User {
 
     // Getters and setters for userId and date created
 
-    public String getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 

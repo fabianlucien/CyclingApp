@@ -16,6 +16,7 @@
 
 package com.google.android.gms.location.sample.activityrecognition;
 
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -32,6 +34,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.etletle.cyclingBehavior.Database;
 import com.etletle.cyclingBehavior.Main;
 import com.etletle.cyclingBehavior.User;
 import com.google.android.gms.common.ConnectionResult;
@@ -43,6 +46,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.DetectedActivity;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
@@ -66,10 +70,8 @@ public class MainActivity extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status> {
 
     protected static final String TAG = "MainActivity";
-//    public static LatestActivities latestActivitiesList = new LatestActivities();
-//    public static boolean isOn;
-//    public static boolean cyclingThreadIsRunning = false;
     public static User user;
+    public static Database database;
 
     /**
      * A receiver for DetectedActivity objects broadcast by the
@@ -102,12 +104,21 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
-        user = new User();
-        Log.i("general", user.getUserId());
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        int memoryClass = am.getMemoryClass();
+        Log.v("onCreate", "memoryClass:" + Integer.toString(memoryClass));
+
+        user = new User();
+        database = new Database();
+
+        Context context = getApplicationContext();
+
+        database.onCreate(context); // create the database object
+
+        database.updateAmountOfUsers(); // a new user is created onCreate
 
         // Get the UI widgets.
         mRequestActivityUpdatesButton = (Button) findViewById(R.id.request_activity_updates_button);
@@ -119,7 +130,11 @@ public class MainActivity extends ActionBarActivity implements
 
         // Enable either the Request Updates button or the Remove Updates button depending on
         // whether activity updates have been requested.
-        setButtonsEnabledState();
+        try {
+            setButtonsEnabledState();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // Reuse the value of mDetectedActivities from the bundle if possible. This maintains state
         // across device orientation changes. If mDetectedActivities is not stored in the bundle,
@@ -201,6 +216,7 @@ public class MainActivity extends ActionBarActivity implements
     /**
      * Runs when a GoogleApiClient object successfully connects.
      */
+
     @Override
     public void onConnected(Bundle connectionHint) {
         Log.i(TAG, "Connected to GoogleApiClient");
@@ -252,7 +268,7 @@ public class MainActivity extends ActionBarActivity implements
      * successfully, the {@code DetectedActivitiesIntentService} stops receiving callbacks about
      * detected activities.
      */
-    public void removeActivityUpdatesButtonHandler(View view) {
+    public  void removeActivityUpdatesButtonHandler(View view) {
         if (!mGoogleApiClient.isConnected()) {
             Toast.makeText(this, getString(R.string.not_connected), Toast.LENGTH_SHORT).show();
             return;
@@ -280,7 +296,11 @@ public class MainActivity extends ActionBarActivity implements
 
             // Update the UI. Requesting activity updates enables the Remove Activity Updates
             // button, and removing activity updates enables the Add Activity Updates button.
-            setButtonsEnabledState();
+            try {
+                setButtonsEnabledState();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             Toast.makeText(
                     this,
@@ -298,13 +318,11 @@ public class MainActivity extends ActionBarActivity implements
      */
     private PendingIntent getActivityDetectionPendingIntent() {
 
-        Log.i("bugFix", String.valueOf(user.isCyclingThreadStartedForUser()));
-
-        // the if stament makes sure correct actions are taken when an app is turned on and off
+        // the if statement makes sure correct actions are taken when an app is turned on and off
 
         if (!user.isAppIsOn()){
-            Context context = getApplicationContext();
-            Main.stopCyclingSession(context);
+//            Context context = getApplicationContext();
+//            Main.stopCyclingSession(context);
             user.setAppIsOn(false);
 
         } else {
@@ -323,16 +341,19 @@ public class MainActivity extends ActionBarActivity implements
      * enabled if the user hasn't yet requested activity updates. The Remove Activity Updates button
      * is enabled if the user has requested activity updates.
      */
-    private void setButtonsEnabledState() {
+    private void setButtonsEnabledState() throws InterruptedException {
         if (getUpdatesRequestedState()) {
             mRequestActivityUpdatesButton.setEnabled(false);
             mRemoveActivityUpdatesButton.setEnabled(true);
             user.setAppIsOn(false);
             Log.i("Testlog", "The start button is off, the stop button is on");
+
             Log.i("Testlog", "----");
         } else {
             mRequestActivityUpdatesButton.setEnabled(true);
             mRemoveActivityUpdatesButton.setEnabled(false);
+            Context context = getApplicationContext();
+            Main.stopCyclingSession(context);
             user.setAppIsOn(true);
             Log.i("Testlog", "The start button is on, the stop button is off");
             Log.i("Testlog", "----");
@@ -393,7 +414,8 @@ public class MainActivity extends ActionBarActivity implements
      * the device.
      */
     public class ActivityDetectionBroadcastReceiver extends BroadcastReceiver {
-        protected static final String TAG = "activity-detection-response-receiver";
+        protected final String TAG = "activity-detection-response-receiver";
+//        protected static final String TAG = "activity-detection-response-receiver";
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -427,4 +449,16 @@ public class MainActivity extends ActionBarActivity implements
         }
     }
 
+    public static void logHeap() {
+        Double allocated = new Double(Debug.getNativeHeapAllocatedSize())/new Double((1048576));
+        Double available = new Double(Debug.getNativeHeapSize())/1048576.0;
+        Double free = new Double(Debug.getNativeHeapFreeSize())/1048576.0;
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(2);
+
+        Log.d("TestLog", "debug. =================================");
+        Log.d("TestLog", "debug.heap native: allocated " + df.format(allocated) + "MB of " + df.format(available) + "MB (" + df.format(free) + "MB free)");
+        Log.d("TestLog", "debug.memory: allocated: " + df.format(new Double(Runtime.getRuntime().totalMemory()/1048576)) + "MB of " + df.format(new Double(Runtime.getRuntime().maxMemory()/1048576))+ "MB (" + df.format(new Double(Runtime.getRuntime().freeMemory()/1048576)) +"MB free)");
+    }
 }
