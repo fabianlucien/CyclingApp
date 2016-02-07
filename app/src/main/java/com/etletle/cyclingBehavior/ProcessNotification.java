@@ -2,9 +2,11 @@ package com.etletle.cyclingBehavior;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.location.sample.activityrecognition.R;
 
@@ -16,33 +18,44 @@ public class ProcessNotification extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-//        Thread thread = new Thread(){
-//
-//            int testInt = 0;
-//            @Override
-//            public void run(){
-//                // you should see the log message if the thread runs
-//                try {
-//
-//                    while (!isAvailable()) {
-//                        sleep(1000);
-//                    }
-//
-//                    Log.i("Thread", String.valueOf(testInt));
-//
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        };
-//
-//        thread.start();
+        // this thread is created to check if there's internet
+        // this thread should run when information has to be send
+        // need a boolean to stop the thread
+        // if true, handle all items in the list
+        // create a list where data can be stored
+        // --> DatabaseObject
+        // --> List of DataBaseObject
+        //
+
+        Thread thread = new Thread(){
+
+            int testInt = 0;
+            @Override
+            public void run(){
+                // you should see the log message if the thread runs
+                try {
+
+                    while (testInt < 5) {
+                        Log.i("Testlog", "Thread for internet is running five times");
+                        sleep(1000);
+                        isAvailable();
+                        testInt+= 1;
+                    }
+
+                    Log.i("Thread", String.valueOf(testInt));
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        thread.start();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-
+        Log.i("Testlog", "ProcessNotification thread called");
         onNewIntent(getIntent());
-
         NotificationManager notificationManager = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(1); // this cancels the notification
@@ -96,6 +109,8 @@ public class ProcessNotification extends Activity{
 
     public void sendDataToDb(String result){
 
+        final Context context = getApplicationContext();
+
         switch (result) {
             case "true positive": ; // a notification is correctly send while performing a cycling activity
                 break;
@@ -106,5 +121,10 @@ public class ProcessNotification extends Activity{
             case "false negative": ; // a notification is not send while performing a cycling activity
                 break;
         }
+    }
+
+    public void removeActivityUpdatesButtonHandler (View view){
+        // problem is that everything is static and can't return to MainActivity.
+
     }
 }

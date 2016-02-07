@@ -23,13 +23,13 @@ import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.etletle.cyclingBehavior.Notification;
+import com.etletle.cyclingBehavior.Main;
 import com.etletle.cyclingBehavior.RegisteredActivity;
-import com.etletle.threads.CyclingThread;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -45,8 +45,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     /** added code */
     public static PowerManager powerManager;
     public static Context context;
-
-    /**
+   /**
      * This constructor is required, and calls the super IntentService(String)
      * constructor with the name for a worker thread.
      */
@@ -105,8 +104,6 @@ public class DetectedActivitiesIntentService extends IntentService {
         String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
         String targetActivity = "Still"; // On a bicycle
 
-        // if activities are caught
-
         if (activityWithHighestValue.equals(targetActivity)){
             MainActivity.user.getUserLatestActivitiesList().updateLatestActivities(1);
         } else {
@@ -116,21 +113,24 @@ public class DetectedActivitiesIntentService extends IntentService {
         int sumOfActivities = MainActivity.user.getUserLatestActivitiesList().sumOfActivities();
         Log.i("TestLog", "Sum of activities is: " + String.valueOf(sumOfActivities));
 
-        if (sumOfActivities > 0){
-            if (MainActivity.cyclingThread == null) {
-                MainActivity.cyclingThread = new CyclingThread();
-                MainActivity.cyclingThread.startCyclingThread(powerManager, context);
-            }
+        Log.i("TestLog", "Has the session started? :  " + String.valueOf(MainActivity.user.isCyclingThreadStartedForUser()));
 
-        } else if (MainActivity.cyclingThread != null){
+        if (sumOfActivities > 0 && !MainActivity.user.isCyclingThreadStartedForUser()){                    // if alreadyStarted, do not start a new listener
+            Main.startCyclingSession(context, powerManager);
+        } else if (sumOfActivities == 0 && MainActivity.user.isCyclingThreadStartedForUser()){
             try {
-                MainActivity.cyclingThread.stopCyclingThread();
-                MainActivity.cyclingThread = null;
+                Main.stopCyclingSession(context);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                return;
             }
-            Notification.cancelNotification(context, 1);
         }
+
+        Log.i("TestLog", "Has the session started? : " + String.valueOf(MainActivity.user.isCyclingThreadStartedForUser()));
+
+        List activitiesList = MainActivity.user.getUserLatestActivitiesList().getLatestActivitiesList();
+
+        Log.i("TestLog", "This is the activitieslist: " + String.valueOf(activitiesList)); // tthis is the activiesList
 
         // Broadcast the list of detected activities.
         localIntent.putExtra(Constants.ACTIVITY_EXTRA, detectedActivities);

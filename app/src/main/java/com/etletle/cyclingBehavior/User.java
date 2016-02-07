@@ -34,6 +34,23 @@ public class User {
     int amountOfFalseNegatives;
     int amountOfTrueNegatives;
 
+    // Threads getters and setters
+
+    public Thread getAssessCyclingSessionThread() {
+        return assessCyclingSessionThread;
+    }
+
+    public void setAssessCyclingSessionThread(Thread assessCyclingSessionThread) {
+        this.assessCyclingSessionThread = assessCyclingSessionThread;
+    }
+
+    public Thread getCyclingThread() {
+        return cyclingThread;
+    }
+
+    public void setCyclingThread(Thread cyclingThread) {
+        this.cyclingThread = cyclingThread;
+    }
 
     // Getter and setter for activities list
 
@@ -99,6 +116,16 @@ public class User {
         this.amountOfNotificationsSend = amountOfNotificationsSend;
     }
 
+
+    // Getter and setter for cycling thread boolean
+
+    public boolean isCyclingThreadStartedForUser() {
+        return cyclingThreadStartedForUser;
+    }
+
+    public void setCyclingThreadStartedForUser(boolean cyclingThreadStartedForUser) {
+        this.cyclingThreadStartedForUser = cyclingThreadStartedForUser;
+    }
 
     // Getter and setter for notification boolean
 
