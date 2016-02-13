@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.activityrecognition;
 
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,11 +35,13 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.etletle.cyclingBehavior.Database;
 import com.etletle.cyclingBehavior.Notification;
 import com.etletle.cyclingBehavior.User;
 import com.etletle.threads.CyclingThread;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
@@ -49,6 +52,8 @@ import com.google.android.gms.location.DetectedActivity;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * This sample demonstrates use of the
@@ -67,6 +72,7 @@ import java.util.ArrayList;
  * returns a {@link com.google.android.gms.common.api.PendingResult}, whose result
  * object is processed by the {@code onResult} callback.
  */
+
 public class MainActivity extends ActionBarActivity implements
         ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<Status> {
 
@@ -74,7 +80,6 @@ public class MainActivity extends ActionBarActivity implements
     public static User user;
     public static Database database;
     public static CyclingThread cyclingThread;
-
 
     /**
      * A receiver for DetectedActivity objects broadcast by the
@@ -108,6 +113,7 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.main_activity);
 
         ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -115,13 +121,12 @@ public class MainActivity extends ActionBarActivity implements
         Log.v("onCreate", "memoryClass:" + Integer.toString(memoryClass));
 
         user = new User();
-        database = new Database();
-
+//        database = new Database();
         Context context = getApplicationContext();
 
-        database.onCreate(context); // create the database object
+//        database.onCreate(context); // create the database object
 
-        database.updateAmountOfUsers(); // a new user is created onCreate
+//        database.updateAmountOfUsers(); // a new user is created onCreate
 
         // Get the UI widgets.
         mRequestActivityUpdatesButton = (Button) findViewById(R.id.request_activity_updates_button);
@@ -145,15 +150,15 @@ public class MainActivity extends ActionBarActivity implements
         // ensures that the bar graphs for only only the most recently detected activities are
         // filled in.
         if (savedInstanceState != null && savedInstanceState.containsKey(
-                Constants.DETECTED_ACTIVITIES)) {
+                com.etletle.activityrecognition.Constants.DETECTED_ACTIVITIES)) {
             mDetectedActivities = (ArrayList<DetectedActivity>) savedInstanceState.getSerializable(
-                    Constants.DETECTED_ACTIVITIES);
+                    com.etletle.activityrecognition.Constants.DETECTED_ACTIVITIES);
         } else {
             mDetectedActivities = new ArrayList<DetectedActivity>();
 
             // Set the confidence level of each monitored activity to zero.
-            for (int i = 0; i < Constants.MONITORED_ACTIVITIES.length; i++) {
-                mDetectedActivities.add(new DetectedActivity(Constants.MONITORED_ACTIVITIES[i], 0));
+            for (int i = 0; i < com.etletle.activityrecognition.Constants.MONITORED_ACTIVITIES.length; i++) {
+                mDetectedActivities.add(new DetectedActivity(com.etletle.activityrecognition.Constants.MONITORED_ACTIVITIES[i], 0));
             }
         }
 
@@ -206,7 +211,7 @@ public class MainActivity extends ActionBarActivity implements
         // Register the broadcast receiver that informs this activity of the DetectedActivity
         // object broadcast sent by the intent service.
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter(Constants.BROADCAST_ACTION));
+                new IntentFilter(com.etletle.activityrecognition.Constants.BROADCAST_ACTION));
     }
 
     @Override
@@ -257,7 +262,7 @@ public class MainActivity extends ActionBarActivity implements
         }
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(
                 mGoogleApiClient,
-                Constants.DETECTION_INTERVAL_IN_MILLISECONDS,
+                com.etletle.activityrecognition.Constants.DETECTION_INTERVAL_IN_MILLISECONDS,
                 getActivityDetectionPendingIntent()
         ).setResultCallback(this);
     }
@@ -344,10 +349,10 @@ public class MainActivity extends ActionBarActivity implements
             mRequestActivityUpdatesButton.setEnabled(true);
             mRemoveActivityUpdatesButton.setEnabled(false);
 
-            if (MainActivity.cyclingThread != null){
+            if (com.etletle.activityrecognition.MainActivity.cyclingThread != null){
                 try {
-                    MainActivity.cyclingThread.stopCyclingThread();
-                    MainActivity.cyclingThread = null;
+                    com.etletle.activityrecognition.MainActivity.cyclingThread.stopCyclingThread();
+                    com.etletle.activityrecognition.MainActivity.cyclingThread = null;
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -356,7 +361,7 @@ public class MainActivity extends ActionBarActivity implements
             user.setAppIsOn(true);
             Context context = getApplicationContext();
             Notification.cancelNotification(context, 1);
-            user.getUserLatestActivitiesList().resetLatestActivitiesList(); // when the user starts the app again, the user starts with a new latest activities list
+            user.resetUserLatestActivitiesList(); // when the user starts the app again, the user starts with a new latest activities list
             Log.i("TestLog", "The start button can be pressed, the stop button cannot be pressed");
 
         }
@@ -370,7 +375,7 @@ public class MainActivity extends ActionBarActivity implements
      * data.
      */
     private SharedPreferences getSharedPreferencesInstance() {
-        return getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
+        return getSharedPreferences(com.etletle.activityrecognition.Constants.SHARED_PREFERENCES_NAME, MODE_PRIVATE);
     }
 
     /**
@@ -379,7 +384,7 @@ public class MainActivity extends ActionBarActivity implements
      */
     private boolean getUpdatesRequestedState() {
         return getSharedPreferencesInstance()
-                .getBoolean(Constants.ACTIVITY_UPDATES_REQUESTED_KEY, false);
+                .getBoolean(com.etletle.activityrecognition.Constants.ACTIVITY_UPDATES_REQUESTED_KEY, false);
     }
 
     /**
@@ -389,7 +394,7 @@ public class MainActivity extends ActionBarActivity implements
     private void setUpdatesRequestedState(boolean requestingUpdates) {
         getSharedPreferencesInstance()
                 .edit()
-                .putBoolean(Constants.ACTIVITY_UPDATES_REQUESTED_KEY, requestingUpdates)
+                .putBoolean(com.etletle.activityrecognition.Constants.ACTIVITY_UPDATES_REQUESTED_KEY, requestingUpdates)
                 .commit();
     }
 
@@ -397,7 +402,7 @@ public class MainActivity extends ActionBarActivity implements
      * Stores the list of detected activities in the Bundle.
      */
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putSerializable(Constants.DETECTED_ACTIVITIES, mDetectedActivities);
+        savedInstanceState.putSerializable(com.etletle.activityrecognition.Constants.DETECTED_ACTIVITIES, mDetectedActivities);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -447,7 +452,7 @@ public class MainActivity extends ActionBarActivity implements
 
         }
         catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(MainActivity.this, "There is no email client installed.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(com.etletle.activityrecognition.MainActivity.this, "There is no email client installed.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -461,6 +466,35 @@ public class MainActivity extends ActionBarActivity implements
 
         Log.d("TestLog", "debug. =================================");
         Log.d("TestLog", "debug.heap native: allocated " + df.format(allocated) + "MB of " + df.format(available) + "MB (" + df.format(free) + "MB free)");
-        Log.d("TestLog", "debug.memory: allocated: " + df.format(new Double(Runtime.getRuntime().totalMemory()/1048576)) + "MB of " + df.format(new Double(Runtime.getRuntime().maxMemory()/1048576))+ "MB (" + df.format(new Double(Runtime.getRuntime().freeMemory()/1048576)) +"MB free)");
+        Log.d("TestLog", "debug.memory: allocated: " + df.format(new Double(Runtime.getRuntime().totalMemory() / 1048576)) + "MB of " + df.format(new Double(Runtime.getRuntime().maxMemory() / 1048576)) + "MB (" + df.format(new Double(Runtime.getRuntime().freeMemory() / 1048576)) + "MB free)");
     }
+
+    public void forceCrash(View view) {
+        throw new RuntimeException("This is a crash");
+    }
+
+    public boolean checkGooglePlayServicesAvailable()
+    {
+        final int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
+
+        if (status == ConnectionResult.SUCCESS)
+        {
+            return true;
+        }
+
+        Log.e("TestLog", "Google Play Services not available: " + GooglePlayServicesUtil.getErrorString(status));
+        Crashlytics.log(GooglePlayServicesUtil.getErrorString(status));
+
+        if (GooglePlayServicesUtil.isUserRecoverableError(status))
+        {
+            final Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(status, this, 1);
+            if (errorDialog != null)
+            {
+                errorDialog.show();
+            }
+        }
+        return false;
+    }
+
+
 }

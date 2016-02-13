@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.activityrecognition;
 
 import android.content.Context;
 import android.content.res.Resources;

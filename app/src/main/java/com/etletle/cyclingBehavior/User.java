@@ -1,8 +1,9 @@
 package com.etletle.cyclingBehavior;
 
-import com.google.android.gms.location.sample.activityrecognition.LatestActivities;
+import com.etletle.activityrecognition.LatestActivities;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by FabianLucien on 2/1/16.
@@ -19,13 +20,9 @@ public class User {
     int amountOfUserSessionEntries = 0;
     int amountOfNotificationsSend = 0;
 
-    boolean cyclingThreadStartedForUser = false;
     boolean userReceivedNotificationForSession = false;
 
     LatestActivities userLatestActivitiesList = new LatestActivities();
-
-    Thread cyclingThread;
-    Thread assessCyclingSessionThread;
 
     // for testing purposes
 
@@ -37,12 +34,28 @@ public class User {
 
     // Getter and setter for activities list
 
-    public LatestActivities getUserLatestActivitiesList() {
+    public List<Integer> getUserLatestActivitiesList() {
+        return userLatestActivitiesList.getLatestActivitiesList();
+    }
+
+    public LatestActivities oldGetUserLatestActivitiesList() {
         return userLatestActivitiesList;
+    }
+
+    public void updateUserLatestActivities(int newActivityValue){
+        this.userLatestActivitiesList.updateLatestActivities(newActivityValue);
     }
 
     public void setUserLatestActivitiesList(LatestActivities userLatestActivitiesList) {
         this.userLatestActivitiesList = userLatestActivitiesList;
+    }
+
+    public void resetUserLatestActivitiesList(){
+        this.userLatestActivitiesList.resetLatestActivitiesList();
+    }
+
+    public int returnSumOfActivities(){
+        return this.userLatestActivitiesList.sumOfActivities();
     }
 
     // Getters and setters for userId and date created

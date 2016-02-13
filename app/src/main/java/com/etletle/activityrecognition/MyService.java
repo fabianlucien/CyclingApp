@@ -1,4 +1,4 @@
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.activityrecognition;
 
 import android.app.Service;
 import android.content.Intent;

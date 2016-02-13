@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.activityrecognition;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -30,7 +30,6 @@ import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
-
 
 /**
  *  IntentService for handling incoming intents that are generated as a result of requesting
@@ -99,32 +98,58 @@ public class DetectedActivitiesIntentService extends IntentService {
         // Logging all activities in one entry
 
         for (int i = 0; i < registeredActivitiesArr.size(); i++) {
-            Log.i("TestLog", "This is an activity: " +  registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
+            Log.i("TestLog", "This is an activity: " + registeredActivitiesArr.get(i).getName() + " " + registeredActivitiesArr.get(i).getPercentage());
         }
 
         String activityWithHighestValue = registeredActivitiesArr.get(0).getName();
-        String targetActivity = "Still"; // On a bicycle
+        String targetActivity = "On a bicycle"; // On a bicycle
 
         // if activities are caught
 
-        if (activityWithHighestValue.equals(targetActivity)){
-            MainActivity.user.getUserLatestActivitiesList().updateLatestActivities(1);
+        boolean isUserLatestActivitiesNull;
+        int sumOfActivities = 0;
+
+        if (MainActivity.user == null){
+            Log.i("TestLog", "User is null");
         } else {
-            MainActivity.user.getUserLatestActivitiesList().updateLatestActivities(0);
+            Log.i("TestLog", "User is not null");
         }
 
-        int sumOfActivities = MainActivity.user.getUserLatestActivitiesList().sumOfActivities();
-        Log.i("TestLog", "Sum of activities is: " + String.valueOf(sumOfActivities));
+        if (com.etletle.activityrecognition.MainActivity.user.getUserLatestActivitiesList() == null) { // not working
+            isUserLatestActivitiesNull = true;
+        } else {
+            isUserLatestActivitiesNull = false;
+        }
 
-        if (sumOfActivities > 0){
-            if (MainActivity.cyclingThread == null) {
-                MainActivity.cyclingThread = new CyclingThread();
-                MainActivity.cyclingThread.startCyclingThread(powerManager, context);
+        if (!isUserLatestActivitiesNull) {
+
+            if (activityWithHighestValue.equals(targetActivity)) {
+                com.etletle.activityrecognition.MainActivity.user.updateUserLatestActivities(1);
+            } else {
+                com.etletle.activityrecognition.MainActivity.user.updateUserLatestActivities(0);
             }
 
-        } else if (MainActivity.cyclingThread != null){
+            sumOfActivities = com.etletle.activityrecognition.MainActivity.user.returnSumOfActivities();
+
+        }
+
+        if (isUserLatestActivitiesNull) {
+            sumOfActivities = 0;
+        }
+
+
+        Log.i("TestLog", "Sum of activities is: " + String.valueOf(sumOfActivities));
+        Log.i("TestLog", "ActivityList: " + com.etletle.activityrecognition.MainActivity.user.getUserLatestActivitiesList());
+
+        if (sumOfActivities > 0) {
+            if (com.etletle.activityrecognition.MainActivity.cyclingThread == null) {
+                com.etletle.activityrecognition.MainActivity.cyclingThread = new CyclingThread();
+                com.etletle.activityrecognition.MainActivity.cyclingThread.startCyclingThread(powerManager, context);
+            }
+
+        } else if (com.etletle.activityrecognition.MainActivity.cyclingThread != null) {
             try {
-                MainActivity.cyclingThread.stopCyclingThread();
+                com.etletle.activityrecognition.MainActivity.cyclingThread.stopCyclingThread();
                 MainActivity.cyclingThread = null;
             } catch (InterruptedException e) {
                 e.printStackTrace();

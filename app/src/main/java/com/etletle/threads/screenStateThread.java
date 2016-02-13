@@ -1,6 +1,5 @@
 package com.etletle.threads;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
@@ -9,13 +8,11 @@ import com.etletle.cyclingBehavior.Notification;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Created by FabianLucien on 2/7/16.
+ * Created by FabianLucien on 2/8/16.
  */
-public class ScreenstateThread extends Activity{
-
+public class ScreenstateThread {
     public Thread screenstateThread;
 
     public boolean screenOn;
@@ -28,68 +25,68 @@ public class ScreenstateThread extends Activity{
     public void startScreenstateThread(final PowerManager pm, final Context context) {
 
         screenstateThread = new Thread() {
-                @Override
-                public void run() {
+            @Override
+            public void run() {
 
-                    try {
+                try {
 
-                        while(!Thread.currentThread().isInterrupted()) {
+                    while(!Thread.currentThread().isInterrupted()) {
 
-                            long currentThreadId = Thread.currentThread().getId();
-                            Log.i("TestLog", "currentThreadId is: " + String.valueOf(currentThreadId));
+//                        long currentThreadId = Thread.currentThread().getId();
+//                        Log.i("TestLog", "currentThreadId is: " + String.valueOf(currentThreadId));
 
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
-                                screenOn = pm.isInteractive();
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
+                            screenOn = pm.isInteractive();
 
-                            } else {
-                                screenOn = pm.isScreenOn();
-                            }
-
-                            if (screenOn && !notificationHasBeenSend) {
-                                    Notification notification = new Notification();
-
-                                    notification.showNotification(context, "Stop cycling", "Stop cycling");
-                                    saveScreenStates = true;
-                                    notificationHasBeenSend = true;
-
-                            } else if (!screenOn){
-                                if (notificationHasBeenSend){
-                                    notificationHasBeenSend = false;
-                                }
-                            }
-
-                            if (saveScreenStates){
-
-                                if (screenStatesList.size() < maxSavedScreenStatesInList) {
-                                    screenStatesList.add(screenOn);
-                                } else {
-                                    assessSavedScreenStates(screenStatesList);
-                                    saveScreenStates = false;
-                                    Log.i("TestLog", String.valueOf(screenStatesList));
-                                    screenStatesList.clear();
-                                }
-                            }
-                            sleep(1000);
-
-                            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-                            Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
-
-                            String testString = "";
-
-                            for (int i = 0; i < threadArray.length; i++){
-                                long iD = threadArray[i].getId();
-
-                                testString += String.valueOf(iD + "  |  ");
-                            }
-                            Log.i("TestLog", String.valueOf(threadArray.length));
-                            Log.i("TestLog", testString);
-                            testString = "";
+                        } else {
+                            screenOn = pm.isScreenOn();
                         }
 
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        return;
-                    }}};
+                        if (screenOn && !notificationHasBeenSend) {
+                            Notification notification = new Notification();
+
+                            notification.showNotification(context, "Stop cycling", "Stop cycling");
+                            saveScreenStates = true;
+                            notificationHasBeenSend = true;
+
+                        } else if (!screenOn){
+                            if (notificationHasBeenSend){
+                                notificationHasBeenSend = false;
+                            }
+                        }
+
+                        if (saveScreenStates){
+
+                            if (screenStatesList.size() < maxSavedScreenStatesInList) {
+                                screenStatesList.add(screenOn);
+                            } else {
+                                assessSavedScreenStates(screenStatesList);
+                                saveScreenStates = false;
+                                Log.i("TestLog", String.valueOf(screenStatesList));
+                                screenStatesList.clear();
+                            }
+                        }
+                        sleep(1000);
+
+//                        Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+//                        Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+//
+//                        String testString = "";
+//
+//                        for (int i = 0; i < threadArray.length; i++){
+//                            long iD = threadArray[i].getId();
+//
+//                            testString += String.valueOf(iD + "  |  ");
+//                        }
+//                        Log.i("TestLog", String.valueOf(threadArray.length));
+//                        Log.i("TestLog", testString);
+//                        testString = "";
+                    }
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }}};
 
         screenstateThread.start();
     }
@@ -127,4 +124,3 @@ public class ScreenstateThread extends Activity{
         }
     }
 }
-

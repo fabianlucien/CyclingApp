@@ -7,7 +7,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.google.android.gms.location.sample.activityrecognition.MainActivity;
+import com.etletle.activityrecognition.MainActivity;
 
 /**
  * Created by FabianLucien on 2/3/16.

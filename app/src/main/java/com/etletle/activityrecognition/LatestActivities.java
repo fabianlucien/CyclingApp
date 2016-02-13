@@ -1,4 +1,4 @@
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.activityrecognition;
 
 import java.util.Arrays;
 import java.util.List;

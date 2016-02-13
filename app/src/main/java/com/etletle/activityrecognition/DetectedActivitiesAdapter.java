@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.gms.location.sample.activityrecognition;
+package com.etletle.activityrecognition;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -55,11 +55,11 @@ public class DetectedActivitiesAdapter extends ArrayAdapter<DetectedActivity> {
         ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.detected_activity_progress_bar);
 
         // Populate widgets with values.
-        activityName.setText(Constants.getActivityString(getContext(),
+        activityName.setText(com.etletle.activityrecognition.Constants.getActivityString(getContext(),
                 detectedActivity.getType()));
 
         int confidence = detectedActivity.getConfidence();
-        String activity = Constants.getActivityString(getContext(),
+        String activity = com.etletle.activityrecognition.Constants.getActivityString(getContext(),
                 detectedActivity.getType());
 
         activityConfidenceLevel.setText(detectedActivity.getConfidence() + "%");
@@ -84,9 +84,9 @@ public class DetectedActivitiesAdapter extends ArrayAdapter<DetectedActivity> {
         // activity was freshly detected, we use its confidence level. Otherwise, we set the
         // confidence level to zero.
         ArrayList<DetectedActivity> tempList = new ArrayList<DetectedActivity>();
-        for (int i = 0; i < Constants.MONITORED_ACTIVITIES.length; i++) {
-            int confidence = detectedActivitiesMap.containsKey(Constants.MONITORED_ACTIVITIES[i]) ?
-                    detectedActivitiesMap.get(Constants.MONITORED_ACTIVITIES[i]) : 0;
+        for (int i = 0; i < com.etletle.activityrecognition.Constants.MONITORED_ACTIVITIES.length; i++) {
+            int confidence = detectedActivitiesMap.containsKey(com.etletle.activityrecognition.Constants.MONITORED_ACTIVITIES[i]) ?
+                    detectedActivitiesMap.get(com.etletle.activityrecognition.Constants.MONITORED_ACTIVITIES[i]) : 0;
 
             tempList.add(new DetectedActivity(Constants.MONITORED_ACTIVITIES[i],
                     confidence));

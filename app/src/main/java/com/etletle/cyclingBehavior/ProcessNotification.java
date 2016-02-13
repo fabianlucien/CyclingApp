@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.google.android.gms.location.sample.activityrecognition.R;
+import com.etletle.activityrecognition.R;
 
 /**
  * Created by FabianLucien on 2/1/16.
